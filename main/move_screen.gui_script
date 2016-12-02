@@ -1,0 +1,139 @@
+
+total_towers = 6
+towers_owners = {}
+walls_defence = {}
+current_tower = 1
+left_tower = total_towers
+right_tower = 2
+
+local counter
+local number_nodes_names = {"progress left", "progress right",
+	"inside defence left", "inside defence right",
+	"outside defence left", "outside defence right"}
+local capture_left_open = 0
+local capture_right_open = 0
+local defence_left_open = 0
+local defence_right_open = 0
+
+
+function clear(self)
+	--print("!@1")
+	for i, val in pairs(number_nodes_names) do
+		gui.set_text(gui.get_node(val), "0")
+	end
+		print(walls_defence[1][1])
+	gui.set_text(gui.get_node("Tower number"), 
+		tostring(current_tower))
+	--print(left_tower, "   ", current_tower, "     ", right_tower);
+	gui.set_text(gui.get_node("inside defence left"), 
+		tostring(walls_defence[current_tower][left_tower]))
+	gui.set_text(gui.get_node("outside defence left"), 
+		tostring(walls_defence[left_tower][current_tower]))
+	gui.set_text(gui.get_node("inside defence right"), 
+		tostring(walls_defence[current_tower][right_tower]))
+	gui.set_text(gui.get_node("outside defence right"), 
+		tostring(walls_defence[right_tower][current_tower]))
+	capture_left_open = 0
+	capture_right_open = 0
+	defence_left_open = 0
+	defence_right_open = 0
+	self.capt_l_cor = coroutine.create(sequence)
+	self.capt_r_cor = coroutine.create(sequence)
+	self.def_r_cor = coroutine.create(sequence)
+	self.def_l_cor = coroutine.create(sequence)
+    args = {}
+    for i = 1, total_towers do
+    	--print("3    ", towers_owners[i])
+    	if towers_owners[i] == 1 then
+    		table.insert(args, hash("player_tower"))
+    	else 
+	    	if towers_owners[i] == -1 then
+	    		table.insert(args, hash("tower"))
+	    	else
+    			table.insert(args, hash("tower_neutral"))
+    		end
+    	end
+    end
+    msg.post("main:/go", "rebuild", args)
+end	
+
+function go_left(self)
+	current_tower = left_tower;
+	left_tower = (total_towers - 2 + left_tower) % total_towers + 1;
+	right_tower = (total_towers - 2 + right_tower) % total_towers + 1;
+	towers_owners[current_tower] = 1;
+	clear(self)
+end
+
+function go_right(self)
+	current_tower = right_tower;
+	left_tower = (left_tower) % total_towers + 1;
+	right_tower = (right_tower) % total_towers + 1;
+	towers_owners[current_tower] = 1;
+	clear(self)
+end
+
+function sequence(self)
+	for i = 1, 50 do
+		coroutine.yield(i)
+	end
+	return 50
+end
+
+function init(self)
+    --print("!!!")
+    for i = 1, total_towers do
+    	towers_owners[i] = 0
+    	walls_defence[i] = {}
+    	for j = 1, total_towers do
+    		walls_defence[i][j] = 0
+    	end
+    end
+    towers_owners[current_tower] = 1
+    msg.post(".", "acquire_input_focus")
+    clear(self)
+    counter = 1
+end
+
+function update(self, dt)
+	--	print(capture_left_open)
+	if capture_left_open > 0 then
+		local status, cnt = coroutine.resume(self.capt_l_cor, self)
+		if status then
+			gui.set_text(gui.get_node("progress left"), tostring(cnt))
+		else
+			go_left(self)
+		end
+	end
+	if capture_right_open > 0 then
+		local status, cnt = coroutine.resume(self.capt_r_cor, self)
+		if status then
+			gui.set_text(gui.get_node("progress right"), tostring(cnt))
+		else
+			go_right(self)
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+    -- Add message-handling code here
+    -- Remove this function if not needed
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("click") and 
+		gui.pick_node(gui.get_node("move left"), action.x, action.y) then
+		--print("!")
+		capture_left_open = 1
+	end
+	if action_id == hash("click") and 
+		gui.pick_node(gui.get_node("move right"), action.x, action.y) then
+		--print("!")
+		capture_right_open = 1
+	end
+end
+
+function on_reload(self)
+    -- Add input-handling code here
+    -- Remove this function if not needed
+end

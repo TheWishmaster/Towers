@@ -1,18 +1,13 @@
 name: "main"
-scale_along_z: 0
+scale_along_z: 1
 embedded_instances {
-  id: "tower"
-  data: "embedded_components {\n"
-  "  id: \"sprite\"\n"
-  "  type: \"sprite\"\n"
-  "  data: \"tile_set: \\\"/main/tower.atlas\\\"\\n"
-  "default_animation: \\\"tower\\\"\\n"
-  "material: \\\"/builtins/materials/sprite.material\\\"\\n"
-  "blend_mode: BLEND_MODE_ALPHA\\n"
-  "\"\n"
+  id: "controls"
+  data: "components {\n"
+  "  id: \"gui\"\n"
+  "  component: \"/main/Movement.gui\"\n"
   "  position {\n"
-  "    x: -344.27484\n"
-  "    y: -122.58271\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
   "    z: 0.0\n"
   "  }\n"
   "  rotation {\n"
@@ -41,18 +36,30 @@ embedded_instances {
   }
 }
 embedded_instances {
-  id: "logo"
-  data: "embedded_components {\n"
-  "  id: \"sprite\"\n"
-  "  type: \"sprite\"\n"
-  "  data: \"tile_set: \\\"/main/logo.atlas\\\"\\n"
-  "default_animation: \\\"logo\\\"\\n"
-  "material: \\\"/builtins/materials/sprite.material\\\"\\n"
-  "blend_mode: BLEND_MODE_ALPHA\\n"
+  id: "go"
+  data: "components {\n"
+  "  id: \"script\"\n"
+  "  component: \"/main/main.script\"\n"
+  "  position {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "  }\n"
+  "  rotation {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "    w: 1.0\n"
+  "  }\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"factory\"\n"
+  "  type: \"factory\"\n"
+  "  data: \"prototype: \\\"/main/tower.go\\\"\\n"
   "\"\n"
   "  position {\n"
-  "    x: 157.79263\n"
-  "    y: -73.028\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
   "    z: 0.0\n"
   "  }\n"
   "  rotation {\n"
@@ -63,6 +70,26 @@ embedded_instances {
   "  }\n"
   "}\n"
   ""
+  position {
+    x: 1236.2869
+    y: 609.80664
+    z: -0.5
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale3 {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+}
+embedded_instances {
+  id: "logo"
+  data: ""
   position {
     x: 640.0
     y: 340.0

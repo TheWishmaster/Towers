@@ -1,0 +1,5 @@
+font: "/main/Raleway-Regular.ttf"
+material: "/builtins/fonts/font.material"
+size: 150
+outline_alpha: 1.0
+outline_width: 2.0

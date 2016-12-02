@@ -1,5 +1,27 @@
 images {
+  image: "/main/images/player_tower.png"
+}
+images {
   image: "/main/images/tower.png"
+}
+images {
+  image: "/main/images/tower_neutral.png"
+}
+animations {
+  id: "anim"
+  images {
+    image: "/main/images/tower_neutral.png"
+  }
+  images {
+    image: "/main/images/player_tower.png"
+  }
+  images {
+    image: "/main/images/tower.png"
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
 }
 margin: 0
 extrude_borders: 0
