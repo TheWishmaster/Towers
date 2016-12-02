@@ -1,5 +1,12 @@
+tower1 = nil
+tower2 = nil
+tower3 = nil
+tower4 = nil
+tower5 = nil
+tower6 = nil
 
 function rebuild(self, map)
+	go.delete_all({tower1, tower2, tower3, tower4, tower5, tower6})
 	tower1 = factory.create("#factory", 
 		vmath.vector3(654,149,0), nil, { owner = map[1] })
 	tower2 = factory.create("#factory", 
@@ -10,7 +17,7 @@ function rebuild(self, map)
 		vmath.vector3(650.86197,640.87887,0), nil, { owner = map[4] })
 	tower5 = factory.create("#factory", 
 		vmath.vector3(415.49296,540.48451,0), nil, { owner = map[5] })
-	tower5 = factory.create("#factory", 
+	tower6 = factory.create("#factory", 
 		vmath.vector3(404.33803,321.84789,0), nil, { owner = map[6] } )
 end
 
