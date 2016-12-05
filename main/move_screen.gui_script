@@ -5,6 +5,7 @@ walls_defence = {}
 current_tower = 1
 left_tower = total_towers
 right_tower = 2
+defence_limit = 10
 
 local counter
 local number_nodes_names = {"progress left", "progress right",
@@ -12,19 +13,16 @@ local number_nodes_names = {"progress left", "progress right",
 	"outside defence left", "outside defence right"}
 local capture_left_open = 0
 local capture_right_open = 0
-local defence_left_open = 0
-local defence_right_open = 0
+local defend_left_open = 0
+local defend_right_open = 0
 
 
 function clear(self)
-	--print("!@1")
 	for i, val in pairs(number_nodes_names) do
 		gui.set_text(gui.get_node(val), "0")
 	end
-		print(walls_defence[1][1])
 	gui.set_text(gui.get_node("Tower number"), 
 		tostring(current_tower))
-	--print(left_tower, "   ", current_tower, "     ", right_tower);
 	gui.set_text(gui.get_node("inside defence left"), 
 		tostring(walls_defence[current_tower][left_tower]))
 	gui.set_text(gui.get_node("outside defence left"), 
@@ -43,7 +41,6 @@ function clear(self)
 	self.def_l_cor = coroutine.create(sequence)
     args = {}
     for i = current_tower, total_towers do
-    	--print("3    ", towers_owners[i])
     	if towers_owners[i] == 1 then
     		table.insert(args, hash("player_tower"))
     	else 
@@ -55,7 +52,6 @@ function clear(self)
     	end
     end
     for i = 1, current_tower - 1 do
-    	--print("3    ", towers_owners[i])
     	if towers_owners[i] == 1 then
     		table.insert(args, hash("player_tower"))
     	else 
@@ -93,7 +89,6 @@ function sequence(self)
 end
 
 function init(self)
-    --print("!!!")
     for i = 1, total_towers do
     	towers_owners[i] = 0
     	walls_defence[i] = {}
@@ -105,6 +100,16 @@ function init(self)
     msg.post(".", "acquire_input_focus")
     clear(self)
     counter = 1
+end
+
+function increase_defence(self, left, right)
+	if walls_defence[left][right] < defence_limit then
+		walls_defence[left][right] = walls_defence[left][right] + 1
+	else
+		defend_left_open = 0
+		defend_right_open = 0
+	end
+	clear(self)
 end
 
 function update(self, dt)
@@ -124,7 +129,12 @@ function update(self, dt)
 			go_right(self)
 		end
 	end
-	
+	if defend_left_open > 0 then
+		increase_defence(self, current_tower, left_tower)
+	end
+	if defend_right_open > 0 then
+		increase_defence(self, current_tower, right_tower)
+	end
 end
 
 function on_message(self, message_id, message, sender)

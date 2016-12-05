@@ -1,6 +1,5 @@
 go.property("owner", hash("none"))
 
 function init(self)
-	print(2)
 	msg.post("#ss", "play_animation", { id = self.owner })
 end
