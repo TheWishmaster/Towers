@@ -1,11 +1,15 @@
 
-total_towers = 6
+total_towers = 8
 towers_owners = {}
 walls_defence = {}
 current_tower = 1
 left_tower = total_towers
 right_tower = 2
+current_tower_enemy = 4
+left_tower_enemy = 5
+right_tower_enemy = 3
 defence_limit = 10
+capture_limit = 100
 
 local counter
 local number_nodes_names = {"progress left", "progress right",
@@ -13,6 +17,8 @@ local number_nodes_names = {"progress left", "progress right",
 	"outside defence left", "outside defence right"}
 local capture_left_open = 0
 local capture_right_open = 0
+local capture_left_open_enemy = 0
+local capture_right_open_enemy = 0
 local defend_left_open = 0
 local defend_right_open = 0
 
@@ -62,7 +68,7 @@ function clear(self)
     		end
     	end
     end
-    msg.post("main:/go", "rebuild", args)
+    msg.post("main:/go", "rebuild", {args, total_towers})
 end	
 
 function go_left(self)
@@ -81,11 +87,30 @@ function go_right(self)
 	clear(self)
 end
 
-function sequence(self)
-	for i = 1, 50 do
-		coroutine.yield(i)
+function go_left_enemy(self)
+	current_tower_enemy = left_tower_enemy;
+	left_tower_enemy = (total_towers - 2 + left_tower_enemy) % total_towers + 1;
+	right_tower_enemy = (total_towers - 2 + right_tower_enemy) % total_towers + 1;
+	towers_owners[current_tower] = -1;
+	clear(self)
+end
+
+function go_right_enemy(self)
+	current_tower_enemy = right_tower_enemy;
+	left_tower_enemy = (left_tower_enemy) % total_towers + 1;
+	right_tower_enemy = (right_tower_enemy) % total_towers + 1;
+	towers_owners[current_tower_enemy] = -1;
+	clear(self)
+end
+
+function sequence(self, slowdown)
+	if slowdown == nil then
+		slowdown = 1
 	end
-	return 50
+	for i = 1, capture_limit * slowdown do
+		coroutine.yield(math.floor(i / slowdown))
+	end
+	return capture_limit
 end
 
 function init(self)
@@ -97,6 +122,7 @@ function init(self)
     	end
     end
     towers_owners[current_tower] = 1
+    towers_owners[current_tower_enemy] = -1
     msg.post(".", "acquire_input_focus")
     clear(self)
     counter = 1
@@ -113,8 +139,45 @@ function increase_defence(self, left, right)
 end
 
 function update(self, dt)
+	local col = 0
+	for i = 1, total_towers do
+		col = col + towers_owners[i]
+	end
+	if col == total_towers then
+		msg.post("@system:", "exit", {code = 0})
+	end
+	if capture_left_open_enemy == 0 and capture_right_open_enemy == 0 then
+		if (math.random(1, 2) == 1) then
+			capture_right_open_enemy = 1
+			self.capt_en = coroutine.create(sequence)
+		else
+			capture_left_open_enemy = 1
+			self.capt_en = coroutine.create(sequence)
+		end
+	end
+	if capture_left_open_enemy > 0 then
+		local status, cnt = coroutine.resume(self.capt_en, 
+			self, walls_defence[left_tower_enemy][current_tower_enemy] + 1)
+		if status == 0 then
+			capture_left_open_enemy = 0
+			go_left_enemy(self)
+		end
+	end
+	if capture_right_open_enemy > 0 then
+		local status, cnt = coroutine.resume(self.capt_en, 
+			self, walls_defence[right_tower_enemy][current_tower_enemy] + 1)
+		if status == 0 then
+			capture_right_open_enemy = 0
+			go_right_enemy(self)
+		end
+	end
 	if capture_left_open > 0 then
-		local status, cnt = coroutine.resume(self.capt_l_cor, self)
+		local cur_def = walls_defence[left_tower][current_tower] + 1
+		if towers_owners[left_tower] == towers_owners[current_tower] then
+			cur_def = 1
+		end
+		local status, cnt = coroutine.resume(self.capt_l_cor, 
+			self, walls_defence[left_tower][current_tower] + 1)
 		if status then
 			gui.set_text(gui.get_node("progress left"), tostring(cnt))
 		else
@@ -122,7 +185,12 @@ function update(self, dt)
 		end
 	end
 	if capture_right_open > 0 then
-		local status, cnt = coroutine.resume(self.capt_r_cor, self)
+		local cur_def = walls_defence[right_tower][current_tower] + 1
+		if towers_owners[right_tower] == towers_owners[current_tower] then
+			cur_def = 1
+		end
+		local status, cnt = coroutine.resume(self.capt_r_cor, 
+			self, walls_defence[right_tower][current_tower] + 1)
 		if status then
 			gui.set_text(gui.get_node("progress right"), tostring(cnt))
 		else
@@ -135,11 +203,6 @@ function update(self, dt)
 	if defend_right_open > 0 then
 		increase_defence(self, current_tower, right_tower)
 	end
-end
-
-function on_message(self, message_id, message, sender)
-    -- Add message-handling code here
-    -- Remove this function if not needed
 end
 
 function on_input(self, action_id, action)
@@ -163,9 +226,4 @@ function on_input(self, action_id, action)
 		clear(self)
 		defend_right_open = 1
 	end
-end
-
-function on_reload(self)
-    -- Add input-handling code here
-    -- Remove this function if not needed
 end

@@ -71,8 +71,8 @@ embedded_instances {
   "}\n"
   ""
   position {
-    x: 1236.2869
-    y: 609.80664
+    x: 1227.6422
+    y: 637.9018
     z: -0.5
   }
   rotation {
@@ -91,8 +91,8 @@ embedded_instances {
   id: "logo"
   data: ""
   position {
-    x: 640.0
-    y: 340.0
+    x: 1034.4128
+    y: 432.93018
     z: 0.0
   }
   rotation {

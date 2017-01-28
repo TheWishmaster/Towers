@@ -1,24 +1,35 @@
-tower1 = nil
-tower2 = nil
-tower3 = nil
-tower4 = nil
-tower5 = nil
-tower6 = nil
+towers = {}
 
-function rebuild(self, map)
-	go.delete_all({tower1, tower2, tower3, tower4, tower5, tower6})
-	tower1 = factory.create("#factory", 
-		vmath.vector3(654,149,0), nil, { owner = map[1] })
-	tower2 = factory.create("#factory", 
-		vmath.vector3(911.88732,322.96338,0), nil, { owner = map[2] })
-	tower3 = factory.create("#factory", 
-		vmath.vector3(868.3831,537.13803,0), nil, { owner = map[3] })
-	tower4 = factory.create("#factory", 
-		vmath.vector3(650.86197,640.87887,0), nil, { owner = map[4] })
-	tower5 = factory.create("#factory", 
-		vmath.vector3(415.49296,540.48451,0), nil, { owner = map[5] })
-	tower6 = factory.create("#factory", 
-		vmath.vector3(404.33803,321.84789,0), nil, { owner = map[6] } )
+function rebuild(self, args)
+	map = args[1]
+	towers_number = args[2]
+	if (towers_number == nil) then
+		towers_number = 0
+	end
+	if towers[1] ~= nil then
+		go.delete_all(towers)
+	end
+	towers = {}
+	for i, val in pairs(map) do
+		local ang = (i - 1 - 0.25 * towers_number) / towers_number * 2 * math.acos(-1.)
+		print(ang)
+		table.insert(towers, factory.create("#factory", 
+		vmath.vector3(640 + 220 * math.cos(ang), 350 + 220 * math.sin(ang), 0), 
+		nil, { owner = map[i] }))
+	end
+	--[[table.insert(towers, factory.create("#factory", 
+		vmath.vector3(654,149,0), nil, { owner = map[1] }) )
+	table.insert(towers, factory.create("#factory", 
+		vmath.vector3(911.88732,322.96338,0), nil, { owner = map[2] }))
+	table.insert(towers, factory.create("#factory", 
+		vmath.vector3(868.3831,537.13803,0), nil, { owner = map[3] }))
+	table.insert(towers, factory.create("#factory", 
+		vmath.vector3(650.86197,640.87887,0), nil, { owner = map[4] }))
+	table.insert(towers, factory.create("#factory", 
+		vmath.vector3(415.49296,540.48451,0), nil, { owner = map[5] }))
+	table.insert(towers, factory.create("#factory", 
+		vmath.vector3(404.33803,321.84789,0), nil, { owner = map[6] } ))
+		--]]
 end
 
 function on_message(self, message_id, message, sender)
