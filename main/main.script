@@ -1,27 +1,60 @@
 towers = {}
+defences_left = {}
+defences_right = {}
+
 
 function rebuild(self, args)
 	map = args[1]
+	map_defence = args[4]
+	existed = args[3]
 	towers_number = args[2]
 	if (towers_number == nil) then
 		towers_number = 0
 	end
+	if (existed == nil) then
+		existed = 0
+	end
 	if towers[1] ~= nil then
 		go.delete_all(towers)
+		go.delete_all(defences_left);
+		go.delete_all(defences_right);
 	end
 	towers = {}
+	defences_left = {}
+	defences_right = {}
 	for i, val in pairs(map) do
 		local ang = (i - 2 - 0.25 * towers_number) / towers_number * 2 * math.acos(-1.)
 		local ang_next = (i - 1 - 0.25 * towers_number) / towers_number * 2 * math.acos(-1.)
-		print(ang)
-		print(ang_next)
-		table.insert(towers, factory.create("#factory", 
+		local ang1 = (i - 2 - 0.25 * towers_number + 0.4) / towers_number * 2 * math.acos(-1.)
+		local ang1_next = (i - 1 - 0.25 * towers_number + 0.4) / towers_number * 2 * math.acos(-1.)
+		local ang2 = (i - 2 - 0.25 * towers_number - 0.4) / towers_number * 2 * math.acos(-1.)
+		local ang2_next = (i - 1 - 0.25 * towers_number - 0.4) / towers_number * 2 * math.acos(-1.)
+		if existed == 0 then
+			ang = ang_next
+			ang1 = ang1_next
+			ang2 = ang2_next
+		end
+		--print(ang)
+		--print(ang_next)
+		table.insert(towers, factory.create("#factorytow", 
 		vmath.vector3(0, 0, 0), 
 		nil, { owner = map[i],
-		 x = 640 + 220 * math.cos(ang), y = 350 + 220 * math.sin(ang),
-		 x_next = 640 + 220 * math.cos(ang_next), 
-		 y_next = 350 + 220 * math.sin(ang_next) } ) )
-		--, x = 640 + 22 * math.cos(ang), y = 350 + 22 * math.sin(ang) } ) )
+		 x = 640 + 250 * math.cos(ang), y = 350 + 250 * math.sin(ang),
+		 x_next = 640 + 250 * math.cos(ang_next), 
+		 y_next = 350 + 250 * math.sin(ang_next),
+		 angle = ang_next } ) )
+		table.insert(defences_right, factory.create("#factorydef", 
+		vmath.vector3(0, 0, 0), 
+		nil, { x = 640 + 250 * math.cos(ang1), y = 350 + 250 * math.sin(ang1),
+		 x_next = 640 + 250 * math.cos(ang1_next), 
+		 y_next = 350 + 250 * math.sin(ang1_next),
+		 angle = ang1_next } ) )
+		table.insert(defences_left, factory.create("#factorydef", 
+		vmath.vector3(0, 0, 0), 
+		nil, { x = 640 + 250 * math.cos(ang2), y = 350 + 250 * math.sin(ang2),
+		 x_next = 640 + 250 * math.cos(ang2_next), 
+		 y_next = 350 + 250 * math.sin(ang2_next),
+		 angle = ang1_next } ) )
 	end
 end
 

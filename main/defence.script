@@ -1,0 +1,10 @@
+go.property("x", 0)
+go.property("y", 0)
+go.property("x_next", 0)
+go.property("y_next", 0)
+
+function init(self)
+	go.set(".", "position", vmath.vector3(self.x, self.y, 0))
+	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, 
+	vmath.vector3(self.x_next, self.y_next, 0), go.EASING_LINEAR, 0.2)
+end

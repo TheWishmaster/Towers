@@ -9,7 +9,7 @@ current_tower_enemy = 4
 left_tower_enemy = 5
 right_tower_enemy = 3
 defence_limit = 10
-capture_limit = 100
+capture_limit = 50
 
 local counter
 local number_nodes_names = {"progress left", "progress right",
@@ -23,7 +23,7 @@ local defend_left_open = 0
 local defend_right_open = 0
 
 
-function clear(self)
+function clear(self, move)
 	for i, val in pairs(number_nodes_names) do
 		gui.set_text(gui.get_node(val), "0")
 	end
@@ -46,6 +46,7 @@ function clear(self)
 	self.def_r_cor = coroutine.create(sequence)
 	self.def_l_cor = coroutine.create(sequence)
     args = {}
+    defence_mask = {}
     for i = current_tower, total_towers do
     	if towers_owners[i] == 1 then
     		table.insert(args, hash("player_tower"))
@@ -56,6 +57,8 @@ function clear(self)
     			table.insert(args, hash("tower_neutral"))
     		end
     	end
+    	table.insert(defence_mask, walls_defence[i][i - 1]);
+    	table.insert(defence_mask, walls_defence[i][i + 1]);
     end
     for i = 1, current_tower - 1 do
     	if towers_owners[i] == 1 then
@@ -67,8 +70,18 @@ function clear(self)
     			table.insert(args, hash("tower_neutral"))
     		end
     	end
+    	if (walls_defence[i][i - 1] == defence_limit) then
+    	   	table.insert(defence_mask, 1);
+    	else 
+    		table.insert(defence_mask, 0);
+    	end
+    	if (walls_defence[i][i + 1] == defence_limit) then
+    	   	table.insert(defence_mask, 1);
+    	else 
+    		table.insert(defence_mask, 0);
+    	end
     end
-    msg.post("main:/go", "rebuild", {args, total_towers})
+    msg.post("main:/go", "rebuild", {args, total_towers, move, defence_mask})
 end	
 
 function go_left(self)
@@ -76,7 +89,7 @@ function go_left(self)
 	left_tower = (total_towers - 2 + left_tower) % total_towers + 1;
 	right_tower = (total_towers - 2 + right_tower) % total_towers + 1;
 	towers_owners[current_tower] = 1;
-	clear(self)
+	clear(self, 1)
 end
 
 function go_right(self)
@@ -84,7 +97,7 @@ function go_right(self)
 	left_tower = (left_tower) % total_towers + 1;
 	right_tower = (right_tower) % total_towers + 1;
 	towers_owners[current_tower] = 1;
-	clear(self)
+	clear(self, 1)
 end
 
 function go_left_enemy(self)
@@ -92,7 +105,7 @@ function go_left_enemy(self)
 	left_tower_enemy = (total_towers - 2 + left_tower_enemy) % total_towers + 1;
 	right_tower_enemy = (total_towers - 2 + right_tower_enemy) % total_towers + 1;
 	towers_owners[current_tower] = -1;
-	clear(self)
+	clear(self, 1)
 end
 
 function go_right_enemy(self)
