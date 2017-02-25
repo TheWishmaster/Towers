@@ -5,11 +5,14 @@ walls_defence = {}
 current_tower = 1
 left_tower = total_towers
 right_tower = 2
-current_tower_enemy = 4
-left_tower_enemy = 5
-right_tower_enemy = 3
+current_tower_enemy = 5
+left_tower_enemy = 6
+right_tower_enemy = 4
 defence_limit = 10
 capture_limit = 50
+mana_points = 0
+controlled_towers = 0
+controlled_towers_enemy = 0
 
 local counter
 local number_nodes_names = {"progress left", "progress right",
@@ -57,8 +60,18 @@ function clear(self, move)
     			table.insert(args, hash("tower_neutral"))
     		end
     	end
-    	table.insert(defence_mask, walls_defence[i][i - 1]);
-    	table.insert(defence_mask, walls_defence[i][i + 1]);
+    	if (walls_defence[i][(i - 2 + total_towers) % total_towers + 1] == defence_limit) then
+    		print("1");
+    	   	table.insert(defence_mask, 1);
+    	else 
+    		table.insert(defence_mask, 0);
+    	end
+    	if (walls_defence[i][i % total_towers + 1] == defence_limit) then
+    		print("2");
+    	   	table.insert(defence_mask, 1);
+    	else 
+    		table.insert(defence_mask, 0);
+    	end
     end
     for i = 1, current_tower - 1 do
     	if towers_owners[i] == 1 then
@@ -70,12 +83,14 @@ function clear(self, move)
     			table.insert(args, hash("tower_neutral"))
     		end
     	end
-    	if (walls_defence[i][i - 1] == defence_limit) then
+    	if (walls_defence[i][(i - 2 + total_towers) % total_towers + 1] == defence_limit) then
+    		print("1");
     	   	table.insert(defence_mask, 1);
     	else 
     		table.insert(defence_mask, 0);
     	end
-    	if (walls_defence[i][i + 1] == defence_limit) then
+    	if (walls_defence[i][i % total_towers + 1] == defence_limit) then
+    		print("2");
     	   	table.insert(defence_mask, 1);
     	else 
     		table.insert(defence_mask, 0);
@@ -126,6 +141,15 @@ function sequence(self, slowdown)
 	return capture_limit
 end
 
+function mana_sequence(self)
+	sum = 0
+	for i = 1, 1000000007 do
+		sum = sum + controlled_towers
+		coroutine.yield(math.floor(sum / 200))
+	end
+	return 1000000007
+end
+
 function init(self)
     for i = 1, total_towers do
     	towers_owners[i] = 0
@@ -136,6 +160,7 @@ function init(self)
     end
     towers_owners[current_tower] = 1
     towers_owners[current_tower_enemy] = -1
+	self.current_mana = coroutine.create(mana_sequence);
     msg.post(".", "acquire_input_focus")
     clear(self)
     counter = 1
@@ -152,11 +177,22 @@ function increase_defence(self, left, right)
 end
 
 function update(self, dt)
-	local col = 0
+	controlled_towers = 0
 	for i = 1, total_towers do
-		col = col + towers_owners[i]
+		if towers_owners[i] == 1 then
+			controlled_towers = controlled_towers + 1
+		end
 	end
-	if col == total_towers then
+	if controlled_towers == total_towers then
+		msg.post("@system:", "exit", {code = 0})
+	end
+	controlled_towers_enemy = 0
+	for i = 1, total_towers do
+		if towers_owners[i] == 1 then
+			controlled_towers_enemy = controlled_towers_enemy + 1
+		end
+	end
+	if controlled_towers_enemy == total_towers then
 		msg.post("@system:", "exit", {code = 0})
 	end
 	if capture_left_open_enemy == 0 and capture_right_open_enemy == 0 then
@@ -190,7 +226,7 @@ function update(self, dt)
 			cur_def = 1
 		end
 		local status, cnt = coroutine.resume(self.capt_l_cor, 
-			self, walls_defence[left_tower][current_tower] + 1)
+			self, cur_def)
 		if status then
 			gui.set_text(gui.get_node("progress left"), tostring(cnt))
 		else
@@ -203,7 +239,7 @@ function update(self, dt)
 			cur_def = 1
 		end
 		local status, cnt = coroutine.resume(self.capt_r_cor, 
-			self, walls_defence[right_tower][current_tower] + 1)
+			self, cur_def)
 		if status then
 			gui.set_text(gui.get_node("progress right"), tostring(cnt))
 		else
@@ -216,6 +252,10 @@ function update(self, dt)
 	if defend_right_open > 0 then
 		increase_defence(self, current_tower, right_tower)
 	end
+	local status
+	status, mana_points = coroutine.resume(self.current_mana, self);
+	gui.set_text(gui.get_node("mana"), 
+		tostring(mana_points))
 end
 
 function on_input(self, action_id, action)

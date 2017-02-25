@@ -37,24 +37,33 @@ function rebuild(self, args)
 		--print(ang)
 		--print(ang_next)
 		table.insert(towers, factory.create("#factorytow", 
-		vmath.vector3(0, 0, 0), 
-		nil, { owner = map[i],
-		 x = 640 + 250 * math.cos(ang), y = 350 + 250 * math.sin(ang),
-		 x_next = 640 + 250 * math.cos(ang_next), 
-		 y_next = 350 + 250 * math.sin(ang_next),
-		 angle = ang_next } ) )
-		table.insert(defences_right, factory.create("#factorydef", 
-		vmath.vector3(0, 0, 0), 
-		nil, { x = 640 + 250 * math.cos(ang1), y = 350 + 250 * math.sin(ang1),
-		 x_next = 640 + 250 * math.cos(ang1_next), 
-		 y_next = 350 + 250 * math.sin(ang1_next),
-		 angle = ang1_next } ) )
-		table.insert(defences_left, factory.create("#factorydef", 
-		vmath.vector3(0, 0, 0), 
-		nil, { x = 640 + 250 * math.cos(ang2), y = 350 + 250 * math.sin(ang2),
-		 x_next = 640 + 250 * math.cos(ang2_next), 
-		 y_next = 350 + 250 * math.sin(ang2_next),
-		 angle = ang1_next } ) )
+			vmath.vector3(0, 0, 0), 
+			nil, { owner = map[i],
+			 x = 640 + 250 * math.cos(ang), y = 350 + 250 * math.sin(ang),
+			 x_next = 640 + 250 * math.cos(ang_next), 
+			 y_next = 350 + 250 * math.sin(ang_next),
+			 angle = ang_next } ) )
+		 
+			--print(map_defence[i * 2 - 1], "  ", map_defence[i * 2])
+		if map_defence[i * 2 - 1] == 1 then
+			--print(i)
+			table.insert(defences_left, factory.create("#factorydef", 
+				vmath.vector3(0, 0, 0), 
+				nil, { x = 640 + 250 * math.cos(ang2), y = 350 + 250 * math.sin(ang2),
+				 x_next = 640 + 250 * math.cos(ang2_next), 
+				 y_next = 350 + 250 * math.sin(ang2_next),
+				 angle = ang1_next } ) )
+		end
+		 
+		if map_defence[i * 2] == 1 then
+			--print("!!")
+			table.insert(defences_right, factory.create("#factorydef", 
+				vmath.vector3(0, 0, 0), 
+				nil, { x = 640 + 250 * math.cos(ang1), y = 350 + 250 * math.sin(ang1),
+				 x_next = 640 + 250 * math.cos(ang1_next), 
+				 y_next = 350 + 250 * math.sin(ang1_next),
+				 angle = ang1_next } ) )
+		end
 	end
 end
 
