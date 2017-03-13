@@ -4,6 +4,7 @@ go.property("y", 0)
 go.property("x_next", 0)
 go.property("y_next", 0)
 go.property("angle", 0)
+go.property("radius", 67)
 
 function init(self)
 	msg.post("#ss", "play_animation", 
@@ -12,4 +13,12 @@ function init(self)
 	--go.set("./left_def", "position", vmath.vector3(50, 100, 0))
 	go.animate(".", "position", go.PLAYBACK_ONCE_FORWARD, 
 	vmath.vector3(self.x_next, self.y_next, 0), go.EASING_LINEAR, 0.2)
+end
+
+function check_click(self, x, y)
+	if (vmath.sqrt((x - self.x) * (x - self.x) + (y - self.y) * (y - self.y)) < self.radius) then
+		return 1
+	else 
+		return 0
+	end
 end
