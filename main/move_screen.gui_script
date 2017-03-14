@@ -157,6 +157,7 @@ function mana_sequence(self)
 end
 
 function init(self)
+	--print("111")
     for i = 1, total_towers do
     	towers_owners[i] = 0
     	walls_defence[i] = {}
